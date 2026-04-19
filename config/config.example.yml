@@ -1,0 +1,67 @@
+app:
+  hostname_override: ""
+  timezone: "UTC"
+  interval_minutes: 60
+  sample_seconds:
+    disk_io: 2
+  thresholds:
+    cpu_warn_percent: 85
+    memory_warn_percent: 85
+    disk_warn_percent: 85
+    mysql_connection_warn_percent: 80
+    replication_lag_warn_seconds: 60
+
+discord:
+  webhook_url: "${DISCORD_WEBHOOK_URL}"
+  username: "VPS Monitor"
+  delivery_mode: "single_embed"
+  max_fields: 20
+  send_ok_detail_messages: false
+  detail_checks:
+    - "VPS Infra"
+    - "Connectivity"
+    - "MySQL"
+    - "Docker"
+    - "systemctl"
+    - "top"
+    - "Netdata"
+
+system:
+  enable_top_snapshot: true
+  top_lines: 15
+  disk_paths:
+    - "/"
+  ping_targets:
+    - name: "google-dns"
+      host: "8.8.8.8"
+      port: 53
+      timeout_seconds: 2
+    - name: "cloudflare"
+      host: "1.1.1.1"
+      port: 53
+      timeout_seconds: 2
+  netdata:
+    enabled: false
+    url: "http://127.0.0.1:19999/api/v1/info"
+    timeout_seconds: 3
+  services:
+    - "mysql"
+    - "docker"
+  docker:
+    enabled: true
+    include_all: false
+
+mysql:
+  enabled: true
+  host: "127.0.0.1"
+  port: 3306
+  user: "${MYSQL_USER}"
+  password: "${MYSQL_PASSWORD}"
+  database: ""
+  connect_timeout_seconds: 5
+  process_name_hint: "mysqld"
+  custom_queries:
+    - name: "active_threads"
+      sql: "SHOW STATUS LIKE 'Threads_running';"
+    - name: "recent_slow_queries"
+      sql: "SHOW GLOBAL STATUS LIKE 'Slow_queries';"

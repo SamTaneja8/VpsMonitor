@@ -1,0 +1,31 @@
+name: VPS Discord Monitor
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"
+
+jobs:
+  run-monitor:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t vps-discord-monitor .
+
+      - name: Run monitor once
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+        run: |
+          docker run --rm \
+            --network host \
+            -e DISCORD_WEBHOOK_URL \
+            -e MYSQL_USER \
+            -e MYSQL_PASSWORD \
+            -v "$GITHUB_WORKSPACE/config:/app/config:ro" \
+            vps-discord-monitor \
+            python main.py --config /app/config/config.yml --once

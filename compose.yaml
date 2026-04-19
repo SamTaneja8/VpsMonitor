@@ -1,0 +1,14 @@
+services:
+  monitor:
+    build: .
+    image: vps-discord-monitor:latest
+    network_mode: host
+    environment:
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./config:/app/config:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: ["python", "main.py", "--config", "/app/config/config.yml", "--loop"]
+    restart: unless-stopped
