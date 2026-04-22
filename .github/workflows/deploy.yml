@@ -1,4 +1,7 @@
-name: Hourly VPS Trigger (No Code Updates)
+name: Hourly VPS Trigger
+
+# VPS now handles its own credentials via the .env file, 
+# No need to pass the secret through the GitHub Action YAML.
 
 on:
   schedule:
@@ -9,25 +12,21 @@ jobs:
   run-tasks:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger Remote Scripts and Docker
+      - name: Trigger Remote Scripts
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DISCORD_WEBHOOK
           script: |
-            export DISCORD_WEBHOOK="${{ secrets.DISCORD_WEBHOOK }}"
             cd ~/dealnews1
             
-            # 1. Ensure containers are up (uses current local images only)
+            # Ensure containers are up
             cd laradock
             docker compose up -d mysql dealnews-scraper
             
-            # 2. Run your local scripts
+            # Run tasks (they will find the .env themselves)
             cd ..
             bash hourly.sh
-            
-            # 3. Run monitor
             source venv/bin/activate
-            python3 monitor.py            python3 monitor.py
+            python3 monitor.pyhon3 monitor.py            python3 monitor.py
