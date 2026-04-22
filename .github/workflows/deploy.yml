@@ -1,0 +1,33 @@
+name: Hourly VPS Maintenance & Monitoring
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: # Allows you to run it manually for testing
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Remote Operations
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DISCORD_WEBHOOK # Passes secret to the SSH session
+          script: |
+            export DISCORD_WEBHOOK="${{ secrets.DISCORD_WEBHOOK }}"
+            cd ~/vpsmonitor
+            git pull origin main
+            
+            # 1. Refresh containers (No Build)
+            cd ~/laradock
+            docker-compose up -d mysql dealnews-scraper
+            
+            # 2. Run the Bash Audit
+            cd ..
+            bash hourly.sh
+            
+            # 3. Run the Python Monitor
+            # Assumes your venv is set up as 'venv'
+            source venv/bin/activate
+            python3 monitor.py
