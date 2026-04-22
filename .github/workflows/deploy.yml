@@ -1,33 +1,33 @@
-name: Hourly VPS Maintenance & Monitoring
+name: Hourly VPS Trigger (No Code Updates)
+
 on:
   schedule:
     - cron: '0 * * * *'
-  workflow_dispatch: # Allows you to run it manually for testing
+  workflow_dispatch:
+
 jobs:
-  deploy:
+  run-tasks:
     runs-on: ubuntu-latest
     steps:
-      - name: Execute Remote Operations
+      - name: Trigger Remote Scripts and Docker
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VPS_IP }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DISCORD_WEBHOOK # Passes secret to the SSH session
+          envs: DISCORD_WEBHOOK
           script: |
             export DISCORD_WEBHOOK="${{ secrets.DISCORD_WEBHOOK }}"
-            cd ~/vpsmonitor
-            git pull origin main
+            cd ~/dealnews1
             
-            # 1. Refresh containers (No Build)
-            cd ~/laradock
-            docker-compose up -d mysql dealnews-scraper
+            # 1. Ensure containers are up (uses current local images only)
+            cd laradock
+            docker compose up -d mysql dealnews-scraper
             
-            # 2. Run the Bash Audit
+            # 2. Run your local scripts
             cd ..
             bash hourly.sh
             
-            # 3. Run the Python Monitor
-            # Assumes your venv is set up as 'venv'
+            # 3. Run monitor
             source venv/bin/activate
-            python3 monitor.py
+            python3 monitor.py            python3 monitor.py
