@@ -17,5 +17,5 @@ jobs:
           key: ${{ secrets.VPS1_PRIV }}
           script: |
             cd /home/${{ secrets.VPS1_USER }}/vpsmonitor
-            chmod +x master_dispatch.sh
-            ./master_dispatch.sh
+            chmod +x run_hourly_retry.sh
+            ./run_hourly_retry.sh
