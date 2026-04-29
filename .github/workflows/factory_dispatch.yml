@@ -1,0 +1,21 @@
+name: Deal Factory Heartbeat
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Runs exactly once an hour
+  workflow_dispatch:      # Still keep this for manual emergency runs
+
+jobs:
+  run-hourly-logic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute Master Script
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS1_HOST }}
+          username: ${{ secrets.VPS1_USER }}
+          key: ${{ secrets.VPS1_PRIV_KEY }}
+          script: |
+            cd /home/${{ secrets.VPS1_USER }}/vpsmonitor
+            chmod +x master_dispatch.sh
+            ./master_dispatch.sh
